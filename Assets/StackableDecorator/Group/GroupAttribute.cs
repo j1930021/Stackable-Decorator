@@ -9,7 +9,7 @@ namespace StackableDecorator
 {
     public class GroupAttribute : StackableDecoratorAttribute
     {
-        public bool indented = true;
+        public bool indented = false;
         public bool indentChildren = false;
         public float spacing = 2;
         public bool fixedCell = true;

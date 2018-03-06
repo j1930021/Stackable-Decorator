@@ -88,7 +88,7 @@ namespace StackableDecorator
 
         public virtual void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
-            if (!includeChildren)
+            if (!includeChildren || !HasVisibleChildFields(property))
                 DefaultPropertyField(position, property, label);
             else
             {

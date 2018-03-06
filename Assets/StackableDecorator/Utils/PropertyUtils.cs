@@ -81,8 +81,8 @@ namespace StackableDecorator
             bool enter = true;
             while (prop.NextVisible(enter) && prop.depth > depth)
             {
-                var paths = prop.propertyPath.Split('.');
-                if (!excludePropertyPaths.Contains(paths[paths.Length - 1]))
+                int index = prop.propertyPath.LastIndexOf('.');
+                if (index == -1 || !excludePropertyPaths.Contains(prop.propertyPath.Substring(index)))
                     result.Add(prop.Copy());
                 enter = false;
             }
@@ -98,8 +98,8 @@ namespace StackableDecorator
             bool enter = true;
             while (prop.NextVisible(enter) && prop.depth > depth)
             {
-                var paths = prop.propertyPath.Split('.');
-                if (!excludePropertyPaths.Contains(paths[paths.Length - 1]))
+                int index = prop.propertyPath.LastIndexOf('.');
+                if (index == -1 || !excludePropertyPaths.Contains(prop.propertyPath.Substring(index)))
                     list.Add(prop.Copy());
                 enter = false;
             }
@@ -231,6 +231,8 @@ namespace StackableDecorator
                     var num = paths[i].TrimEnd(']').Substring(5);
                     int index;
                     if (!int.TryParse(num, out index))
+                        return false;
+                    if (obj == null)
                         return false;
                     if (obj.GetType().IsArrayOrList())
                     {

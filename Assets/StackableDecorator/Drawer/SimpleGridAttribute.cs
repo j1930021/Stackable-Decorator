@@ -7,11 +7,11 @@ using UnityEditor;
 
 namespace StackableDecorator
 {
-    public class SimpleGridAttribute : StackableFieldAttribute
+    public class SimpleGridAttribute : StackableFieldAttribute, INoCacheInspectorGUI
     {
         public int column = 4;
-        public float cellWidth = 50;
-        public float cellHeight = 50;
+        public float cellWidth = -1;
+        public float cellHeight = 16;
         public float spacing = 2;
         public float maxHeight = -1;
 
@@ -20,7 +20,6 @@ namespace StackableDecorator
         public string maxHeightGetter = null;
 #if UNITY_EDITOR
         private string m_List = string.Empty;
-        private Vector2 m_Scroll;
 
         private DynamicValue<int> m_DynamicColumn = null;
         private DynamicValue<Vector2> m_DynamicSize = null;
@@ -36,6 +35,7 @@ namespace StackableDecorator
             public float maxHeight;
             public int arraySize;
             public SerializedProperty serializedProperty;
+            public Vector2 scroll;
         }
 #endif
         public SimpleGridAttribute()
@@ -127,9 +127,9 @@ namespace StackableDecorator
             data.cellHeight = cellHeight;
             data.maxHeight = maxHeight;
 
-            var height = row * cellHeight;
+            var height = row * cellHeight + (row - 1) * spacing;
             if (maxHeight >= 0)
-                height = Mathf.Min(row * cellHeight, maxHeight);
+                height = Mathf.Min(height, maxHeight);
 
             return height;
         }
@@ -153,7 +153,7 @@ namespace StackableDecorator
             var realWidth = view.width;
 
             if (realHeight > position.height)
-                m_Scroll = GUI.BeginScrollView(position, m_Scroll, view);
+                data.scroll = GUI.BeginScrollView(position, data.scroll, view);
 
             int index = 0;
             var element = data.serializedProperty.FindPropertyRelative("Array.data[0]");

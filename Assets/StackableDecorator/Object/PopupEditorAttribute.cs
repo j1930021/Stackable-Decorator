@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Reflection;
 #if UNITY_EDITOR
 using UnityEditor;
+using System.Collections.Generic;
 #if UNITY_2017_1_OR_NEWER
 using UnityEditor.Experimental.AssetImporters;
 #endif
@@ -12,9 +13,11 @@ namespace StackableDecorator
     public class PopupEditorAttribute : StyledDecoratorAttribute
     {
         public float width = 16;
-        public float height = 1;
+        public float height = 16;
 #if UNITY_EDITOR
         protected override string m_defaultStyle { get { return "StaticDropdown"; } }
+
+        private Dictionary<string, float> m_Height = new Dictionary<string, float>();
 #endif
         public PopupEditorAttribute()
         {
@@ -24,6 +27,10 @@ namespace StackableDecorator
 #if UNITY_EDITOR
         public override float GetHeight(SerializedProperty property, GUIContent label, float height)
         {
+            if (!IsVisible()) return height;
+            m_Height[property.propertyPath] = height;
+            var h = this.height < 0 ? m_ContentSize.y : this.height;
+            height = Mathf.Max(h, height);
             return height;
         }
 
@@ -31,14 +38,17 @@ namespace StackableDecorator
         {
             if (!IsVisible()) return visible;
             if (!visible) return false;
+            if (Event.current.type == EventType.Layout) return visible;
             if (property.propertyType != SerializedPropertyType.ObjectReference) return visible;
 
-            var rect = new Rect(position);
-            rect.xMin = rect.xMax - width;
+            var w = width < 0 ? m_ContentSize.x : width;
+            var h = height < 0 ? m_ContentSize.y : height;
+            var rect = position.WidthFromRight(w).Height(h);
             using (new EditorGUI.DisabledScope(property.objectReferenceValue == null))
                 if (GUI.Button(rect, m_Content, m_Style))
                     EditorPopup.Show(rect, property.objectReferenceValue, position.width);
-            position.width -= width + 4;
+            position.width -= w + 4;
+            position.height = m_Height.Get(property.propertyPath, 16);
             return true;
         }
 

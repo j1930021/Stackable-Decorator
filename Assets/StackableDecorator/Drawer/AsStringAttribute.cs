@@ -7,12 +7,13 @@ namespace StackableDecorator
 {
     public class AsStringAttribute : StackableFieldAttribute
     {
-        public bool label = true;
-        public bool icon = true;
-        public bool tooltip = true;
+        public bool label = false;
+        public bool icon = false;
+        public bool tooltip = false;
 #if UNITY_EDITOR
+        private GUIContent m_Content = new GUIContent();
+
         private static GUIStyle s_Style = null;
-        private static GUIContent s_Content = new GUIContent();
 #endif
         public AsStringAttribute()
         {
@@ -34,20 +35,13 @@ namespace StackableDecorator
                 s_Style.alignment = TextAnchor.MiddleLeft;
                 s_Style.clipping = TextClipping.Clip;
             }
-            s_Content.text = property.AsString();
+            m_Content.text = property.AsString();
+            if (icon) m_Content.image = label.image;
+            if (tooltip) m_Content.tooltip = label.tooltip;
             if (this.label)
-            {
-                label = EditorGUI.BeginProperty(position, label, property);
-                position = EditorGUI.PrefixLabel(position, label);
-            }
+                EditorGUI.LabelField(position, label, m_Content, s_Style);
             else
-            {
-                if (icon) s_Content.image = label.image;
-                if (tooltip) s_Content.tooltip = label.tooltip;
-            }
-            GUI.Label(position, s_Content, s_Style);
-            if (this.label)
-                EditorGUI.EndProperty();
+                EditorGUI.LabelField(position, m_Content, s_Style);
         }
 #endif
     }

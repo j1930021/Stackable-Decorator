@@ -12,7 +12,7 @@ namespace StackableDecorator
         public SceneOnlyAttribute()
         {
 #if UNITY_EDITOR
-            m_Message = "%2 %3 is not an scene object.";
+            m_Message = "%2 %3 is not a scene object.";
 #endif
         }
 

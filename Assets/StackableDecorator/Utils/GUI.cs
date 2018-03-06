@@ -74,10 +74,10 @@ namespace StackableDecorator
                     if (count == 1) style = m_Style;
                     if (column == 1) style = m_Style;
                     var size = style.CalcSize(m_Contents[i]);
-                    width += size.x;
+                    width = Mathf.Max(width, size.x);
                     height = Mathf.Max(height, size.y);
                 }
-                result.x = width + (column - 1) * hOffset;
+                result.x = (column * width) + CalcTotalHorizSpacing(column);
                 float yspace = (Mathf.Max(m_Style.margin.top, m_Style.margin.bottom) + vOffset) * (row - 1);
                 result.y = (row * height) + yspace;
             }
@@ -195,8 +195,7 @@ namespace StackableDecorator
             for (int i = 0; i < count; i++)
             {
                 array[i] = new Rect(x, y, width, height);
-                array[i].width = Mathf.Round(array[i].xMax) - Mathf.Round(array[i].x);
-                array[i].x = Mathf.Round(array[i].x);
+                array[i].width = array[i].xMax - array[i].x;
                 var style2 = i == count - 2 ? m_LastStyle : m_MidStyle;
                 x += width + Mathf.Max(style1.margin.right, style2.margin.left) + hOffset;
                 col++;

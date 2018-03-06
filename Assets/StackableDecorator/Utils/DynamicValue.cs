@@ -221,8 +221,8 @@ namespace StackableDecorator
             if (field != null && field.FieldType == typeof(T))
             {
                 m_FieldGetter = field.MakeGetter();
-                m_Type = DynamicType.Getter;
                 m_MethodDeclaring = field.DeclaringType;
+                m_Type = DynamicType.Getter;
                 return;
             }
             prop = type.GetProperty(input, flag);
@@ -231,6 +231,7 @@ namespace StackableDecorator
             if (prop != null && prop.PropertyType == typeof(T))
             {
                 m_InstanceGetter = prop.GetGetMethod(true).MakeFuncGenericThis<Func<object, T>>();
+                m_MethodDeclaring = prop.DeclaringType;
                 m_Type = DynamicType.Getter;
                 return;
             }

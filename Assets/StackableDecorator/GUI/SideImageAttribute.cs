@@ -1,6 +1,4 @@
-using System.Linq;
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -109,7 +107,7 @@ namespace StackableDecorator
 
             float width = 0;
             if (this.width < 0)
-                width = data.imageSize.x;
+                width = data.imageSize.x * data.imageHeight / data.imageSize.y;
             else if (this.width <= 1)
                 width = indent.width * this.width;
             else

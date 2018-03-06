@@ -22,8 +22,6 @@ namespace StackableDecorator
         private float m_Top;
         private float m_Bottom;
 
-        private Vector2 m_Scroll;
-
         private bool m_Visible;
         private Rect m_Position;
 
@@ -37,6 +35,7 @@ namespace StackableDecorator
             public float maxHeight;
             public SerializedObject serializedObject = null;
             public List<float> propertyHeights = new List<float>();
+            public Vector2 scroll;
         }
 #endif
         public InlinePropertyAttribute(float left = 3, float right = 3, float top = 3, float bottom = 3)
@@ -117,16 +116,18 @@ namespace StackableDecorator
             if (data.inlineHeight > 0)
                 GUI.Label(indent, GUIContent.none, m_Style);
 
-            var rect = new Rect(m_Position);
-            rect.yMin += data.height + 2;
-            rect.xMin += Mathf.Max(0, m_Left);
-            rect.xMax -= Mathf.Max(0, m_Right);
-            rect.yMin += m_Top;
-
             var text = label.text;
             var image = label.image;
             var tooltip = label.tooltip;
             int indentLevel = EditorGUI.indentLevel;
+
+            if (indentChildren) EditorGUI.indentLevel++;
+            var rect = m_Position.indent(indentChildren);
+            rect.yMin += data.height + 2;
+            rect.xMin += Mathf.Max(0, m_Left);
+            rect.xMax -= Mathf.Max(0, m_Right);
+            rect.yMin += m_Top;
+            EditorGUI.indentLevel = indentLevel;
 
             var realHeight = data.inlineHeight;
             var view = new Rect(rect);
@@ -136,9 +137,9 @@ namespace StackableDecorator
             var realWidth = view.width;
 
             if (realHeight > rect.height)
-                m_Scroll = GUI.BeginScrollView(rect, m_Scroll, view);
+                data.scroll = GUI.BeginScrollView(rect, data.scroll, view);
             rect.width = realWidth;
-            InlineProperty.Draw(rect, data.serializedObject, indentChildren, data.propertyHeights);
+            InlineProperty.Draw(rect, data.serializedObject, false, data.propertyHeights);
             if (realHeight > rect.height)
                 GUI.EndScrollView();
 

@@ -20,10 +20,10 @@ namespace StackableDecorator
 #endif
         }
 
-        public LabelAttribute(float Width)
+        public LabelAttribute(float width)
         {
 #if UNITY_EDITOR
-            m_LabelWidth = Width;
+            m_LabelWidth = width;
 #endif
         }
 #if UNITY_EDITOR
