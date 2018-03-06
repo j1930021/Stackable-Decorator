@@ -57,17 +57,24 @@ namespace StackableDecorator
             rect.width = width;
             rect.height = height < 0 ? m_ContentSize.y : height;
 
-            if (alignment == TextAlignment.Right)
+            if (alignment == TextAlignment.Left)
+            {
+                if (m_Left > 0) rect.x += m_Left;
+            }
+            else if (alignment == TextAlignment.Right)
             {
                 rect.xMin = indent.xMax - rect.width;
                 rect.xMax = indent.xMax;
+                if (m_Right > 0) rect.x -= m_Right;
             }
             else if (alignment == TextAlignment.Center)
             {
+                if (m_Left > 0) rect.width -= m_Left;
+                if (m_Right > 0) rect.width -= m_Right;
                 rect.x += (indent.width - rect.width) / 2;
             }
-            rect.xMin += m_Left;
-            rect.xMax -= m_Right;
+            if (m_Left < 0) rect.xMin += m_Left;
+            if (m_Right < 0) rect.xMax -= m_Right;
 
             if (below)
                 rect.y = indent.yMax - rect.height - m_Top - m_Bottom;

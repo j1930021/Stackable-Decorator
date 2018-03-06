@@ -6,14 +6,21 @@ using UnityEditor;
 
 namespace StackableDecorator
 {
-    public class AsImageAttribute : StackableFieldAttribute
+    public class AsImageAttribute : StackableFieldAttribute, INoCacheInspectorGUI
     {
         public float width = -1;
         public float height = -1;
         public string sizeGetter = null;
 #if UNITY_EDITOR
         private DynamicValue<Vector2> m_DynamicSize = null;
-        private Dictionary<string, Vector2> m_SizeCache = new Dictionary<string, Vector2>();
+
+        private Dictionary<string, Data> m_Data = new Dictionary<string, Data>();
+
+        private class Data
+        {
+            public Texture2D image;
+            public Vector2 size;
+        }
 #endif
         public AsImageAttribute()
         {
@@ -34,9 +41,16 @@ namespace StackableDecorator
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label, bool includeChildren)
         {
+            if (property.propertyType != SerializedPropertyType.ObjectReference || !(property.objectReferenceValue is Texture2D))
+                return EditorGUIUtility.singleLineHeight;
+
             Update();
-            m_SizeCache[property.propertyPath] = new Vector2(width, height);
-            return height;
+            var data = m_Data.Get(property.propertyPath);
+            data.image = property.objectReferenceValue as Texture2D;
+            data.size = new Vector2();
+            data.size.x = width == -1 ? data.image.width : width;
+            data.size.y = height == -1 ? data.image.height : height;
+            return data.size.y;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
@@ -47,11 +61,9 @@ namespace StackableDecorator
                 return;
             }
 
-            var size = m_SizeCache.Get(property.propertyPath, new Vector2(-1, -1));
-            var tex = property.objectReferenceValue as Texture2D;
-            position.width = size.x == -1 ? tex.width : size.x;
-            position.height = size.y == -1 ? tex.height : size.y;
-            GUI.DrawTexture(position, tex);
+            var data = m_Data.Get(property.propertyPath);
+            position.size = data.size;
+            GUI.DrawTexture(position, data.image);
         }
 #endif
     }

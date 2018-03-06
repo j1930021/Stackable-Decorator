@@ -33,6 +33,7 @@ namespace StackableDecorator
         public override bool BeforeGUI(ref Rect position, ref SerializedProperty property, ref GUIContent label, ref bool includeChildren, bool visible)
         {
             if (!IsVisible()) return visible;
+            if (!visible) return false;
             m_SavedEnabled = GUI.enabled;
             var condition = all ? MatchAll() : MatchAny();
             if (condition && enable)

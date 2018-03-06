@@ -89,7 +89,7 @@ namespace StackableDecorator
                     height = data.properties[index] == null ? 0 : EditorGUI.GetPropertyHeight(data.properties[index], null, true);
                     if (height < 0) height = 0;
                     data.propertyHeights.Add(height);
-                    if (width > 0)
+                    if (width != 0)
                         result = Mathf.Max(height, result);
                 }
                 index++;
@@ -109,15 +109,16 @@ namespace StackableDecorator
             var image = label.image;
             var tooltip = label.tooltip;
 
+            var content = m_Content;
             if (title == null)
-                m_Content.text = text;
+                content.text = text;
             if (icon == null)
-                m_Content.image = image;
+                content.image = image;
             if (tooltip == null)
-                m_Content.tooltip = tooltip;
+                content.tooltip = tooltip;
             Rect rect;
             if (prefix)
-                rect = EditorGUI.PrefixLabel(position, m_Content, m_Style);
+                rect = EditorGUI.PrefixLabel(position, content, m_Style);
             else
                 rect = indented ? EditorGUI.IndentedRect(position) : new Rect(position);
 

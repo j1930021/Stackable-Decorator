@@ -63,9 +63,10 @@ namespace StackableDecorator
 #if UNITY_2018_1_OR_NEWER && UNITY_EDITOR
         public override bool CanCacheInspectorGUI(SerializedProperty property)
         {
-            var drawrer = (StackableDrawerAttribute)attribute;
+            if (attribute is INoCacheInspectorGUI) return false;
+            var drawrer = (StackableFieldAttribute)attribute;
             drawrer.Setup(property, fieldInfo);
-            return !drawrer.modifiers.OfType<NoCacheInspectorGUI>().Any();
+            return !drawrer.decorators.OfType<INoCacheInspectorGUI>().Any();
         }
 #endif
     }

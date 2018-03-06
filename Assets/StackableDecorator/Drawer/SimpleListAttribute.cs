@@ -7,7 +7,7 @@ using UnityEditor;
 
 namespace StackableDecorator
 {
-    public class SimpleListAttribute : StackableFieldAttribute
+    public class SimpleListAttribute : StackableFieldAttribute, INoCacheInspectorGUI
     {
         public float spacing = 2;
         public float fixedHeight = -1;
@@ -16,7 +16,6 @@ namespace StackableDecorator
         public string maxHeightGetter = null;
 #if UNITY_EDITOR
         private string m_List = string.Empty;
-        private Vector2 m_Scroll;
 
         private DynamicValue<float> m_DynamicMaxHeight = null;
         private Dictionary<string, Data> m_Data = new Dictionary<string, Data>();
@@ -28,6 +27,7 @@ namespace StackableDecorator
             public float maxHeight;
             public int arraySize;
             public SerializedProperty listProperty;
+            public Vector2 scroll;
         }
 #endif
         public SimpleListAttribute()
@@ -136,7 +136,7 @@ namespace StackableDecorator
             var realWidth = view.width;
 
             if (realHeight > position.height)
-                m_Scroll = GUI.BeginScrollView(position, m_Scroll, view);
+                data.scroll = GUI.BeginScrollView(position, data.scroll, view);
             var rect = new Rect(position);
             rect.width = realWidth;
 

@@ -21,8 +21,11 @@ namespace StackableDecorator
         {
             public int arraySize;
             public List<float> propertyHeights = new List<float>();
-            public SerializedProperty listProperty;
-            public ReorderableList reorderableList;
+            public SerializedProperty listProperty = null;
+            public ReorderableList reorderableList = null;
+
+            public int lastIndex;
+            public SerializedProperty lastElement = null;
         }
 #endif
         public ListAttribute()
@@ -72,7 +75,7 @@ namespace StackableDecorator
             data.reorderableList.serializedProperty = data.listProperty;
 
             float height = 38;
-            if (expandable && !data.listProperty.isExpanded)
+            if (expandable && !m_SerializedProperty.isExpanded)
                 height = EditorGUIUtility.singleLineHeight;
             else
             {
@@ -103,7 +106,10 @@ namespace StackableDecorator
             }
 
             m_CurrentData = data;
-            if (!expandable || data.listProperty.isExpanded)
+            m_CurrentData.lastIndex = 0;
+            m_CurrentData.lastElement = m_CurrentData.listProperty.FindPropertyRelative("Array.data[0]");
+
+            if (!expandable || m_SerializedProperty.isExpanded)
                 data.reorderableList.DoList(position);
             else
                 DrawHeaderCallback(position.Shrink(6, 0, 0, 0));
@@ -129,30 +135,36 @@ namespace StackableDecorator
         {
             if (!expandable)
             {
-                GUI.Label(rect, m_CurrentData.listProperty.displayName);
+                GUI.Label(rect, m_SerializedProperty.displayName);
                 return;
             }
             rect.xMin -= 6;
-            var label = EditorGUI.BeginProperty(rect, null, m_CurrentData.listProperty);
-            var result = EditorGUI.Foldout(rect, m_CurrentData.listProperty.isExpanded, label, true, EditorStyles.foldout);
-            if (result != m_CurrentData.listProperty.isExpanded)
-                m_CurrentData.listProperty.isExpanded = result;
+            var label = EditorGUI.BeginProperty(rect, null, m_SerializedProperty);
+            var result = EditorGUI.Foldout(rect, m_SerializedProperty.isExpanded, label, true, EditorStyles.foldout);
+            if (result != m_SerializedProperty.isExpanded)
+                m_SerializedProperty.isExpanded = result;
             EditorGUI.EndProperty();
         }
 
         private float ElementHeightCallback(int index)
         {
             //return EditorGUI.GetPropertyHeight(m_CurrentData.listProperty.GetArrayElementAtIndex(index), null, true) + 2;
-            return m_CurrentData.propertyHeights[index];
+            return m_CurrentData.propertyHeights[index] + 2;
         }
 
         private void DrawElementCallback(Rect rect, int index, bool isActive, bool isFocused)
         {
+            if (index == m_CurrentData.lastIndex + 1)
+                m_CurrentData.lastElement.NextVisible(false);
+            else if (index != m_CurrentData.lastIndex)
+                m_CurrentData.lastElement = m_CurrentData.listProperty.GetArrayElementAtIndex(index);
+            m_CurrentData.lastIndex = index;
+
             var hierarchyMode = EditorGUIUtility.hierarchyMode;
             int indentLevel = EditorGUI.indentLevel;
             EditorGUIUtility.hierarchyMode = false;
             EditorGUI.indentLevel = 0;
-            EditorGUI.PropertyField(rect, m_CurrentData.listProperty.GetArrayElementAtIndex(index), null, true);
+            EditorGUI.PropertyField(rect, m_CurrentData.lastElement, null, true);
             EditorGUIUtility.hierarchyMode = hierarchyMode;
             EditorGUI.indentLevel = indentLevel;
         }

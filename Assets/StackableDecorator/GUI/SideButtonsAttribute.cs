@@ -1,6 +1,5 @@
 using System.Linq;
 using UnityEngine;
-using System;
 using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -8,13 +7,13 @@ using UnityEditor;
 
 namespace StackableDecorator
 {
-    public class SideButtonsAttribute : StackableDecoratorAttribute
+    public class SideButtonsAttribute : StyledDecoratorAttribute
     {
         public string titles = string.Empty;
         public string icons = string.Empty;
         public string tooltips = string.Empty;
         public string actions = string.Empty;
-        public string styles = null;
+        public string buttonStyles = null;
         public int column = -1;
         public int hOffset = 0;
         public int vOffset = 0;
@@ -26,6 +25,8 @@ namespace StackableDecorator
         public bool onLeft = false;
         public TextAlignment alignment = TextAlignment.Left;
 #if UNITY_EDITOR
+        protected override string m_defaultStyle { get { return "minibutton"; } }
+
         private class DynamicContent
         {
             public DynamicValue<string> Title;
@@ -114,7 +115,7 @@ namespace StackableDecorator
             var data = m_Data.Get(property.propertyPath);
             data.height = height;
             if (data.buttonGroup == null)
-                data.buttonGroup = new ButtonGroup(m_Contents, styles == null ? EditorStyles.miniButton.name : styles);
+                data.buttonGroup = new ButtonGroup(m_Contents, buttonStyles == null ? m_Style.name : buttonStyles);
             data.buttonGroup.Update(m_Contents);
             data.buttonGroup.hOffset = hOffset;
             data.buttonGroup.vOffset = vOffset;
