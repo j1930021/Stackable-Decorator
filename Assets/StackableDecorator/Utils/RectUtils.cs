@@ -93,6 +93,32 @@ namespace StackableDecorator
         }
         #endregion
 
+        #region Cut width and height
+        public static Rect CutLeft(this Rect rect, float width)
+        {
+            rect.xMin = Mathf.Min(rect.xMin + width, rect.xMax);
+            return rect;
+        }
+
+        public static Rect CutRight(this Rect rect, float width)
+        {
+            rect.xMax = Mathf.Max(rect.xMin, rect.xMax - width);
+            return rect;
+        }
+
+        public static Rect CutTop(this Rect rect, float height)
+        {
+            rect.yMin = Mathf.Min(rect.yMin + height, rect.yMax);
+            return rect;
+        }
+
+        public static Rect CutBottom(this Rect rect, float height)
+        {
+            rect.yMax = Mathf.Max(rect.yMin, rect.yMax - height);
+            return rect;
+        }
+        #endregion
+
         #region Move
         public static Rect MoveLeft(this Rect rect)
         {
