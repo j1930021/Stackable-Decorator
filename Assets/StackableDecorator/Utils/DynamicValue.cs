@@ -9,7 +9,7 @@ namespace StackableDecorator
 {
     public class DynamicValue<T>
     {
-        public enum DynamicType { None, Static, SerializedProperty, Getter }
+        public enum DynamicType { None, Fail, Static, SerializedProperty, Getter }
 
         private DynamicType m_Type;
         private T m_Static;
@@ -17,6 +17,7 @@ namespace StackableDecorator
         private SerializedProperty m_SerializedProperty;
         private string m_RelativePath;
 
+        private Type m_DynamicType = typeof(T);
         private Type m_MethodDeclaring = null;
         private Type m_ParameterType = null;
         private Func<object, object> m_FieldGetter = null;
@@ -30,10 +31,17 @@ namespace StackableDecorator
         private List<FieldInfo> m_FieldInfoList = new List<FieldInfo>();
         private List<Func<object, object>> m_ObjectGetterList = new List<Func<object, object>>();
 
+        public DynamicValue()
+        {
+            m_Type = DynamicType.None;
+            m_Default = default(T);
+        }
+
         public DynamicValue(T input)
         {
             m_Static = input;
             m_Type = DynamicType.Static;
+            m_Default = default(T);
         }
 
         public DynamicValue(string input, SerializedProperty property)
@@ -43,9 +51,42 @@ namespace StackableDecorator
             m_Default = default(T);
         }
 
+        public DynamicValue(string input, SerializedProperty property, Type type)
+        {
+            Update(property);
+            m_DynamicType = type;
+            ProcessInput(input);
+            m_Default = default(T);
+        }
+
         public DynamicValue(string input, SerializedProperty property, T def)
         {
             Update(property);
+            ProcessInput(input);
+            m_Default = def;
+        }
+
+        public void UpdateAndCheckInitial(string input, SerializedProperty property)
+        {
+            Update(property);
+            if (m_Type != DynamicType.None) return;
+            ProcessInput(input);
+            m_Default = default(T);
+        }
+
+        public void UpdateAndCheckInitial(string input, SerializedProperty property, Type type)
+        {
+            Update(property);
+            if (m_Type != DynamicType.None) return;
+            m_DynamicType = type;
+            ProcessInput(input);
+            m_Default = default(T);
+        }
+
+        public void UpdateAndCheckInitial(string input, SerializedProperty property, T def)
+        {
+            Update(property);
+            if (m_Type != DynamicType.None) return;
             ProcessInput(input);
             m_Default = def;
         }
@@ -86,7 +127,7 @@ namespace StackableDecorator
         private void ProcessInput(string input)
         {
             if (input == null)
-                m_Type = DynamicType.None;
+                m_Type = DynamicType.Fail;
             else if (input.StartsWith("$"))
                 ProcessSerializedProperty(input);
             else if (input.StartsWith("#"))
@@ -97,7 +138,7 @@ namespace StackableDecorator
                 m_Type = DynamicType.Static;
             }
             else
-                m_Type = DynamicType.None;
+                m_Type = DynamicType.Fail;
         }
 
         private void ProcessSerializedProperty(string input)
@@ -111,7 +152,7 @@ namespace StackableDecorator
             }
             if (prop == null)
             {
-                m_Type = DynamicType.None;
+                m_Type = DynamicType.Fail;
                 return;
             }
             m_RelativePath = input;
@@ -138,7 +179,7 @@ namespace StackableDecorator
             bool ok2 = m_SerializedProperty.GetObjectGetters(m_ObjectGetterList);
             if (!ok1 || !ok2)
             {
-                m_Type = DynamicType.None;
+                m_Type = DynamicType.Fail;
                 return;
             }
 
@@ -150,7 +191,7 @@ namespace StackableDecorator
             var field = type.GetField(input, flag);
             if (m_FieldInfoList.Count > 1)
                 field = m_FieldInfoList[m_FieldInfoList.Count - 2].FieldType.GetField(input, flag);
-            if (field != null && field.FieldType == typeof(T))
+            if (field != null && field.FieldType == m_DynamicType)
             {
                 m_FieldGetter = field.MakeGetter();
                 m_Type = DynamicType.Getter;
@@ -159,14 +200,14 @@ namespace StackableDecorator
             var prop = type.GetProperty(input, flag);
             if (m_FieldInfoList.Count > 1)
                 prop = m_FieldInfoList[m_FieldInfoList.Count - 2].FieldType.GetProperty(input, flag);
-            if (prop != null && prop.PropertyType == typeof(T))
+            if (prop != null && prop.PropertyType == m_DynamicType)
             {
                 m_StaticGetter = prop.GetGetMethod(true).MakeStaticFunc<Func<T>>();
                 m_Type = DynamicType.Getter;
                 return;
             }
             var method = type.GetMethod(input, flag);
-            if (method != null && method.ReturnType == typeof(T))
+            if (method != null && method.ReturnType == m_DynamicType)
             {
                 var parameters = method.GetParameters();
                 if (parameters.Length == 0)
@@ -192,7 +233,7 @@ namespace StackableDecorator
                 if (type2.IsArrayOrList())
                     type2 = type2.GetArrayOrListElementType();
                 method = type2.GetMethod(input, flag);
-                if (method != null && method.ReturnType == typeof(T))
+                if (method != null && method.ReturnType == m_DynamicType)
                 {
                     var parameters = method.GetParameters();
                     if (parameters.Length == 0)
@@ -218,7 +259,7 @@ namespace StackableDecorator
             field = type.GetField(input, flag);
             if (m_FieldInfoList.Count > 1)
                 field = m_FieldInfoList[m_FieldInfoList.Count - 2].FieldType.GetField(input, flag);
-            if (field != null && field.FieldType == typeof(T))
+            if (field != null && field.FieldType == m_DynamicType)
             {
                 m_FieldGetter = field.MakeGetter();
                 m_MethodDeclaring = field.DeclaringType;
@@ -228,7 +269,7 @@ namespace StackableDecorator
             prop = type.GetProperty(input, flag);
             if (m_FieldInfoList.Count > 1)
                 prop = m_FieldInfoList[m_FieldInfoList.Count - 2].FieldType.GetProperty(input, flag);
-            if (prop != null && prop.PropertyType == typeof(T))
+            if (prop != null && prop.PropertyType == m_DynamicType)
             {
                 m_InstanceGetter = prop.GetGetMethod(true).MakeFuncGenericThis<Func<object, T>>();
                 m_MethodDeclaring = prop.DeclaringType;
@@ -236,7 +277,7 @@ namespace StackableDecorator
                 return;
             }
             method = type.GetMethod(input, flag);
-            if (method != null && method.ReturnType == typeof(T))
+            if (method != null && method.ReturnType == m_DynamicType)
             {
                 var parameters = method.GetParameters();
                 if (parameters.Length == 0)
@@ -262,7 +303,7 @@ namespace StackableDecorator
                 if (type2.IsArrayOrList())
                     type2 = type2.GetArrayOrListElementType();
                 method = type2.GetMethod(input, flag);
-                if (method != null && method.ReturnType == typeof(T))
+                if (method != null && method.ReturnType == m_DynamicType)
                 {
                     var parameters = method.GetParameters();
                     if (parameters.Length == 0)
@@ -284,7 +325,7 @@ namespace StackableDecorator
                 }
             }
 
-            m_Type = DynamicType.None;
+            m_Type = DynamicType.Fail;
         }
 
         private int GetArrayIndex()
@@ -376,7 +417,7 @@ namespace StackableDecorator
 
         private void SetupConvertor()
         {
-            var type = typeof(T);
+            var type = m_DynamicType;
             if (type == typeof(bool))
                 if (BoolConvertor == null) BoolConvertor = (Func<bool, T>)(object)FromBool;
             if (type == typeof(int))
@@ -398,7 +439,7 @@ namespace StackableDecorator
         private T GetSerializedPropertyValue(SerializedProperty property)
         {
             SetupConvertor();
-            var type = typeof(T);
+            var type = m_DynamicType;
             if (type == typeof(string))
                 return StringConvertor(property.AsString());
             if (type == typeof(bool) && property.propertyType == SerializedPropertyType.Boolean)
