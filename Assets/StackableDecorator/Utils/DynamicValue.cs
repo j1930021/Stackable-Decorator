@@ -96,6 +96,11 @@ namespace StackableDecorator
             m_SerializedProperty = property;
         }
 
+        public bool IsStatic()
+        {
+            return m_Type != DynamicType.SerializedProperty && m_Type != DynamicType.Getter;
+        }
+
         public T GetValue()
         {
             switch (m_Type)
