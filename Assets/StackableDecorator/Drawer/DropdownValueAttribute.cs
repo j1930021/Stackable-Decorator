@@ -74,7 +74,7 @@ namespace StackableDecorator
 
             if (names != null && m_NameArray != null)
             {
-                var length = Math.Min(names.Length, values.Length);
+                var length = Math.Min(m_NameArray.Length, values.Length);
                 if (m_Names.Length != length)
                     m_Names = new string[length];
                 if (m_Values.Length != length)
@@ -105,7 +105,7 @@ namespace StackableDecorator
 
             label = EditorGUI.BeginProperty(position, label, property);
             selected = EditorGUI.Popup(position, label.text, selected, m_Names);
-            if (selected < 0 || selected >= names.Length)
+            if (selected < 0 || selected >= m_Names.Length)
             {
                 var rect = EditorGUI.PrefixLabel(position, m_Content);
                 GUI.Label(rect, placeHolder, m_Style);
