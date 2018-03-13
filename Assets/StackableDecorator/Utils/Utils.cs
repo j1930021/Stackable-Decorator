@@ -48,6 +48,11 @@ namespace StackableDecorator
             }
         }
 #endif
+        public static bool IsPowerOfTwo(this long number)
+        {
+            return number != 0 && (number & (number - 1)) == 0;
+        }
+
         public static IEnumerable<T> Yield<T>(this T item)
         {
             yield return item;
