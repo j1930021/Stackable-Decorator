@@ -83,6 +83,12 @@ namespace StackableDecorator
                 m_Values = m_Values.Take(length).ToList();
             }
 
+            if (m_Values == null)
+            {
+                EditorGUI.LabelField(position, label.text, "Getter not correct.");
+                return;
+            }
+
             long selected = property.longValue;
             long allmask = 0;
             foreach (var mask in m_Values)
