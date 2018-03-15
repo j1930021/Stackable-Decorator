@@ -33,4 +33,4 @@ public bool Decorator = true;
 Please read the [wiki](https://github.com/Kinwailo/Stackable-Decorator/wiki) for the document of property drawers and decorators.
 
 # Update
-Added TextField, DropdownValue, EnumPopup, EnumMaskPopup, LayerMaskPopup, DropdownMask
+Added [TextField](https://github.com/Kinwailo/Stackable-Decorator/wiki/StackableFieldAttribute#textfieldattribute), [DropdownValue](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumPopupAttribute#dropdownvalueattribute), [EnumPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumPopupAttribute), [EnumMaskPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute), [LayerMaskPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute#layermaskpopupattribute), [DropdownMask](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute#dropdownmaskattribute)
