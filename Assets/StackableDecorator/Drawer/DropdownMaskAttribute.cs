@@ -14,7 +14,7 @@ namespace StackableDecorator
         public bool showAll = true;
         public bool showCombined = false;
         public bool sortCombined = true;
-#if UNITY_EDITOR
+#if UNITY_5_6_OR_NEWER && UNITY_EDITOR
         private string m_NamesGetter;
         private string m_ValuesGetter;
         private List<string> m_Names = null;
@@ -30,7 +30,7 @@ namespace StackableDecorator
 #endif
         public DropdownMaskAttribute(string names, string values)
         {
-#if UNITY_EDITOR
+#if UNITY_5_6_OR_NEWER && UNITY_EDITOR
             m_NamesGetter = names;
             m_ValuesGetter = values;
 #endif
@@ -43,6 +43,10 @@ namespace StackableDecorator
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
+#if !UNITY_5_6_OR_NEWER
+            EditorGUI.LabelField(position, label.text, "Use with Unity 5.6 or above.");
+            return;
+#else
             if (property.propertyType != SerializedPropertyType.Integer)
             {
                 EditorGUI.LabelField(position, label.text, "Use with int or long.");
@@ -119,6 +123,7 @@ namespace StackableDecorator
             if (MaskPopupList.IsSelectionChanged(id))
                 property.longValue = MaskPopupList.GetLastSelectedValue();
             EditorGUI.EndProperty();
+#endif
         }
 #endif
     }

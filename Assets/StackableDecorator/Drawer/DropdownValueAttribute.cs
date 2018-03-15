@@ -44,8 +44,12 @@ namespace StackableDecorator
                 case SerializedPropertyType.LayerMask:
                 case SerializedPropertyType.ArraySize:
                 case SerializedPropertyType.Gradient:
+#if UNITY_5_6_OR_NEWER
                 case SerializedPropertyType.ExposedReference:
+#endif
+#if UNITY_2017_1_OR_NEWER
                 case SerializedPropertyType.FixedBufferSize:
+#endif
                     EditorGUI.LabelField(position, label.text, "Not supported.");
                     return;
             }
@@ -105,5 +109,5 @@ namespace StackableDecorator
             EditorGUI.EndProperty();
         }
 #endif
-    }
-}
+            }
+        }

@@ -17,7 +17,7 @@ namespace StackableDecorator
         public bool showAll = true;
         public bool showCombined = false;
         public bool sortCombined = true;
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_5_6_OR_NEWER
         private List<string> m_Names = null;
         private List<long> m_Values = null;
 
@@ -29,7 +29,7 @@ namespace StackableDecorator
 #endif
         public EnumMaskPopupAttribute()
         {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_5_6_OR_NEWER
 #endif
         }
 #if UNITY_EDITOR
@@ -40,6 +40,10 @@ namespace StackableDecorator
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
+#if !UNITY_5_6_OR_NEWER
+            EditorGUI.LabelField(position, label.text, "Use with Unity 5.6 or above.");
+            return;
+#else
             if (property.propertyType != SerializedPropertyType.Enum)
             {
                 EditorGUI.LabelField(position, label.text, "Use with Enum.");
@@ -116,6 +120,7 @@ namespace StackableDecorator
             if (MaskPopupList.IsSelectionChanged(id))
                 property.longValue = MaskPopupList.GetLastSelectedValue();
             EditorGUI.EndProperty();
+#endif
         }
 #endif
     }
