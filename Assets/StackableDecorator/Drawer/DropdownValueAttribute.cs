@@ -94,6 +94,12 @@ namespace StackableDecorator
                 m_Values = m_Values.Take(length).ToArray();
             }
 
+            if (m_Values == null)
+            {
+                EditorGUI.LabelField(position, label.text, "Getter not correct.");
+                return;
+            }
+
             var propertyValue = property.GetValueAsObject();
             int selected = Array.IndexOf(m_Values, propertyValue);
 
