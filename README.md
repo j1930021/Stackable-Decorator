@@ -32,5 +32,8 @@ public bool Decorator = true;
 # How to use
 Please read the [wiki](https://github.com/Kinwailo/Stackable-Decorator/wiki) for the document of property drawers and decorators.
 
+# Link
+\[ [Asset Store](https://www.assetstore.unity3d.com/#!/content/111270) \] - \[ [Forum Thread](https://forum.unity.com/threads/free-open-source-stackable-decorator-property-drawer-with-multiple-stackable-decorator.520856/) \] - \[ [WIP Thread](https://forum.unity.com/threads/free-stackable-decorator-beta-property-drawer-with-multiple-stackable-decorator.514943/) \]
+
 # Update
 Added [TextField](https://github.com/Kinwailo/Stackable-Decorator/wiki/StackableFieldAttribute#textfieldattribute), [DropdownValue](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumPopupAttribute#dropdownvalueattribute), [EnumPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumPopupAttribute), [EnumMaskPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute), [LayerMaskPopup](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute#layermaskpopupattribute), [DropdownMask](https://github.com/Kinwailo/Stackable-Decorator/wiki/EnumMaskPopupAttribute#dropdownmaskattribute)
