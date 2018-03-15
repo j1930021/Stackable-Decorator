@@ -82,7 +82,7 @@ namespace StackableDecorator
             float result = 0;
             foreach (var width in widths)
             {
-                if (index < 0 && width > 0)
+                if (index < 0 && width != 0)
                     result = Mathf.Max(data.height, result);
                 if (index >= 0)
                 {
