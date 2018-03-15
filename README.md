@@ -31,3 +31,6 @@ public bool Decorator = true;
 
 # How to use
 Please read the [wiki](https://github.com/Kinwailo/Stackable-Decorator/wiki) for the document of property drawers and decorators.
+
+# Update
+Added TextField, DropdownValue, EnumPopup, EnumMaskPopup, LayerMaskPopup, DropdownMask
