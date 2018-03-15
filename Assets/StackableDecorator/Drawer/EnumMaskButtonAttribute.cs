@@ -28,10 +28,18 @@ namespace StackableDecorator
         {
             if (m_ButtonMask == null)
             {
-                var names = Enum.GetNames(m_FieldInfo.FieldType).Except(exclude.Split(',')).ToArray();
-                //var values = Array.ConvertAll(Enum.GetValues(m_FieldInfo.FieldType).Cast<Enum>().ToArray(), value => Convert.ToInt64(value));
-                var values = names.Select(n => Convert.ToInt64(Enum.Parse(m_FieldInfo.FieldType, n))).ToArray();
-                m_ButtonMask = new ButtonMask(names, values, all, styles == null ? EditorStyles.miniButton.name : styles);
+                var type = m_FieldInfo.FieldType;
+                type = type.IsArrayOrList() ? type.GetArrayOrListElementType() : type;
+
+                var names = Enum.GetNames(type).Except(exclude.Split(',')).ToList();
+                var values = names.Select(n => Convert.ToInt64(Enum.Parse(type, n))).ToList();
+                int index;
+                while ((index = values.IndexOf(0)) >= 0)
+                {
+                    names.RemoveAt(index);
+                    values.RemoveAt(index);
+                }
+                m_ButtonMask = new ButtonMask(names.ToArray(), values.ToArray(), all, styles == null ? EditorStyles.miniButton.name : styles);
             }
             m_ButtonMask.hOffset = hOffset;
             m_ButtonMask.vOffset = vOffset;

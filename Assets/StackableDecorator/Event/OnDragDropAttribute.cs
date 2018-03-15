@@ -20,7 +20,7 @@ namespace StackableDecorator
         private DynamicValue<bool> m_DropAccept = null;
         private DynamicAction m_DropAction = null;
 
-        private static int s_OnDragDropHash = "StackableDecorate.OnDragDropAttribute".GetHashCode();
+        private static int s_HashCode = "StackableDecorator.OnDragDropAttribute".GetHashCode();
 #endif
         public OnDragDropAttribute()
         {
@@ -43,7 +43,7 @@ namespace StackableDecorator
 
         private void HandleEvent(Rect position)
         {
-            var id = GUIUtility.GetControlID(s_OnDragDropHash, FocusType.Passive, position);
+            var id = GUIUtility.GetControlID(s_HashCode, FocusType.Passive, position);
             var evt = Event.current;
             switch (evt.GetTypeForControl(id))
             {

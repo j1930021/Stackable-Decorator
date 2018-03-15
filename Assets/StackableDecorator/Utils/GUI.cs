@@ -250,6 +250,213 @@ namespace StackableDecorator
         }
     }
 
+    public class MaskPopupList : PopupWindowContent
+    {
+        private const string kCommandName = "MaskPopupList";
+
+        private const float kItemHeight = 18;
+        private const float kHeaderHeight = 20;
+
+        private class Styles
+        {
+            public GUIStyle even = "ObjectPickerResultsOdd";
+            public GUIStyle odd = "ObjectPickerResultsEven";
+            public GUIStyle toggle = "OL Toggle";
+            public GUIStyle header = "IN BigTitle";
+            public GUIStyle element;
+            public Styles()
+            {
+                element = new GUIStyle(EditorStyles.label);
+                element.alignment = TextAnchor.MiddleLeft;
+                element.padding.left = 10;
+                element.active = element.normal;
+            }
+        }
+        private static Styles s_Styles;
+        private static MaskPopupList s_LastPopup;
+        private static GUIContent s_Content = new GUIContent();
+
+        private float m_Width;
+        private float m_MaxHeight;
+        private Vector2 m_ScrollPos;
+        private bool m_ScrollBar;
+        private float m_WidthExpand = 0;
+
+        private long m_Selected;
+        private string[] m_Names;
+        private long[] m_Values;
+        private bool m_SortCombined;
+        private int m_Id;
+        private EditorWindow m_Window;
+
+        public static void Popup(Rect position, long selected, IEnumerable<string> names, IEnumerable<long> values, bool sort, int id)
+        {
+            var type = typeof(Editor).Assembly.GetType("UnityEditor.GUIView");
+            var current = type.GetProperty("current", BindingFlags.Public | BindingFlags.Static);
+            type = typeof(Editor).Assembly.GetType("UnityEditor.HostView");
+            var actualView = type.GetProperty("actualView", BindingFlags.NonPublic | BindingFlags.Instance);
+            var window = (EditorWindow)actualView.GetValue(current.GetValue(null, null), null);
+
+            var popup = new MaskPopupList();
+            popup.m_Width = position.width;
+            popup.m_Selected = selected;
+            popup.m_Names = names.ToArray();
+            popup.m_Values = values.ToArray();
+            popup.m_SortCombined = sort;
+            popup.m_Id = id;
+            popup.m_Window = window;
+            s_LastPopup = popup;
+            PopupWindow.Show(position, popup);
+        }
+
+        public static bool IsSelectionChanged(int id)
+        {
+            if (s_LastPopup == null || s_LastPopup.m_Id != id) return false;
+            var evt = Event.current;
+            if (evt.type == EventType.ExecuteCommand && evt.commandName == kCommandName)
+            {
+                evt.Use();
+                return true;
+            }
+            return false;
+        }
+
+        public static long GetLastSelectedValue()
+        {
+            return s_LastPopup.m_Selected;
+        }
+
+        private MaskPopupList()
+        {
+            m_MaxHeight = Screen.height * 0.8f;
+        }
+
+        public override Vector2 GetWindowSize()
+        {
+            var h = kHeaderHeight + m_Names.Length * kItemHeight;
+            if (h > m_MaxHeight)
+            {
+                h = m_MaxHeight;
+                m_ScrollBar = true;
+            }
+            if (m_WidthExpand != 0)
+            {
+                m_Width += m_WidthExpand;
+                m_WidthExpand = 0;
+            }
+            return new Vector2(m_Width, h);
+        }
+
+        public override void OnGUI(Rect rect)
+        {
+            if (s_Styles == null) s_Styles = new Styles();
+            DrawHeader();
+            DrawList();
+            if (m_WidthExpand != 0)
+                editorWindow.Repaint();
+        }
+
+        private void DrawHeader()
+        {
+            var rect = new Rect(0, 0, m_Width, kHeaderHeight);
+            GUI.Label(rect, GUIContent.none, s_Styles.header);
+
+            long allmask = 0;
+            foreach (var mask in m_Values)
+                allmask |= mask;
+            bool all = m_Selected == allmask;
+            EditorGUI.BeginChangeCheck();
+
+            rect.yMin = rect.yMax - 18;
+            GUI.Button(rect, all ? "Select None" : "Select All", s_Styles.element);
+
+            rect = new Rect(rect.xMax - 23, rect.y + (rect.height - 17) / 2, 17, 17);
+            if (m_ScrollBar)
+                rect.x -= 14;
+            GUI.Toggle(rect, all, GUIContent.none, s_Styles.toggle);
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                var value = all ? 0 : allmask;
+                if (value != m_Selected)
+                {
+                    m_Selected = value;
+                    SendCommand();
+                }
+            }
+        }
+
+        private void DrawList()
+        {
+            bool even = false;
+            var rect = new Rect(0, 0, m_Width, kItemHeight);
+            if (m_ScrollBar)
+            {
+                rect.width -= 14;
+                var scroll = new Rect(0, kHeaderHeight, m_Width, m_MaxHeight - kHeaderHeight);
+                var view = new Rect(0, 0, m_Width - 15, m_Names.Length * kItemHeight);
+                m_ScrollPos = GUI.BeginScrollView(scroll, m_ScrollPos, view);
+            }
+            else
+                rect.y += kHeaderHeight;
+
+            for (int i = 0; i < m_Names.Length; i++)
+                if (!m_SortCombined || m_Values[i].IsPowerOfTwo())
+                {
+                    GUI.Label(rect, GUIContent.none, even ? s_Styles.even : s_Styles.odd);
+                    DrawItem(rect, i);
+                    rect.y += kItemHeight;
+                    even = !even;
+                }
+            if (m_SortCombined)
+                for (int i = 0; i < m_Names.Length; i++)
+                    if (!m_Values[i].IsPowerOfTwo())
+                    {
+                        GUI.Label(rect, GUIContent.none, even ? s_Styles.even : s_Styles.odd);
+                        DrawItem(rect, i);
+                        rect.y += kItemHeight;
+                        even = !even;
+                    }
+
+            if (m_ScrollBar)
+                GUI.EndScrollView();
+        }
+
+        private void DrawItem(Rect rect, int index)
+        {
+            rect.width -= 23;
+            s_Content.text = m_Names[index];
+            var width = s_Styles.element.CalcSize(s_Content).x + 8;
+            if (width > rect.width)
+                m_WidthExpand = Mathf.Max(m_WidthExpand, width - rect.width);
+            if (GUI.Button(rect, m_Names[index], s_Styles.element))
+                Toggle(index);
+            rect = new Rect(rect.xMax, rect.y + (rect.height - 17) / 2, 17, 17);
+            var value = GUI.Toggle(rect, IsSelected(index), GUIContent.none, s_Styles.toggle);
+            if (value != IsSelected(index))
+                Toggle(index);
+        }
+
+        private bool IsSelected(int index)
+        {
+            return (m_Selected & m_Values[index]) == m_Values[index];
+        }
+
+        private void Toggle(int index)
+        {
+            if (Event.current.button == 1)
+                m_Selected = m_Values[index];
+            else
+                m_Selected = IsSelected(index) ? m_Selected & (~m_Values[index]) : m_Selected | m_Values[index];
+            SendCommand();
+        }
+
+        private void SendCommand()
+        {
+            m_Window.SendEvent(EditorGUIUtility.CommandEvent(kCommandName));
+        }
+    }
+
     public static class InlineProperty
     {
         public static float GetHeight(SerializedObject serializedObject, List<float> propertyHeights = null)
