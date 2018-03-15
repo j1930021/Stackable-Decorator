@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Linq;
 using System.Collections.Generic;
-using System;
 using System.Text;
 #if UNITY_EDITOR
 using UnityEditor;
@@ -26,7 +25,6 @@ namespace StackableDecorator
         private DynamicValue<int[]> m_DynamicIntValues = new DynamicValue<int[]>();
 
         private static GUIContent s_Content = new GUIContent();
-        private static GUIStyle s_Style = null;
         private static StringBuilder s_StringBuilder = new StringBuilder();
         private static int s_HashCode = "StackableDecorator.DropdownMaskAttribute".GetHashCode();
 #endif
@@ -49,12 +47,6 @@ namespace StackableDecorator
             {
                 EditorGUI.LabelField(position, label.text, "Use with int or long.");
                 return;
-            }
-
-            if (s_Style == null)
-            {
-                s_Style = new GUIStyle(EditorStyles.popup);
-                s_Style.normal.background = null;
             }
 
             m_DynamicNames.UpdateAndCheckInitial(m_NamesGetter, property);
@@ -81,6 +73,10 @@ namespace StackableDecorator
                     m_Names.RemoveAt(index);
                     m_Values.RemoveAt(index);
                 }
+
+                var length = Mathf.Min(m_Names.Count, m_Values.Count);
+                m_Names = m_Names.Take(length).ToList();
+                m_Values = m_Values.Take(length).ToList();
             }
 
             long selected = property.longValue;

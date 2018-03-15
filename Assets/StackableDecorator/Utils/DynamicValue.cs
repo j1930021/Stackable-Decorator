@@ -354,10 +354,8 @@ namespace StackableDecorator
         {
             object self = null, declaring = null;
             if (m_SerializedProperty.GetObjectsFromGetter(m_ObjectGetterList, m_ObjectList))
-            {
-                declaring = m_ObjectList.FirstOrDefault(o => o != null && o.GetType().Equals(m_MethodDeclaring));
                 self = m_ObjectList[m_ObjectList.Count - 1];
-            }
+            declaring = m_ObjectList.FirstOrDefault(o => o != null && o.GetType().Equals(m_MethodDeclaring));
 
             if (m_FieldGetter != null)
                 return (T)m_FieldGetter(declaring);

@@ -18,7 +18,6 @@ namespace StackableDecorator
         private List<long> m_Values = null;
 
         private static GUIContent s_Content = new GUIContent();
-        private static GUIStyle s_Style = null;
         private static StringBuilder s_StringBuilder = new StringBuilder();
         private static int s_HashCode = "StackableDecorator.LayerMaskPopupAttribute".GetHashCode();
 #endif
@@ -39,12 +38,6 @@ namespace StackableDecorator
             {
                 EditorGUI.LabelField(position, label.text, "Use with LayerMask.");
                 return;
-            }
-
-            if (s_Style == null)
-            {
-                s_Style = new GUIStyle(EditorStyles.popup);
-                s_Style.normal.background = null;
             }
 
             if (m_Names == null)

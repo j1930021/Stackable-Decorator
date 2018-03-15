@@ -14,7 +14,7 @@ namespace StackableDecorator
         private string m_Action;
         private DynamicAction m_DynamicAction = null;
 
-        private static int s_OnClickHash = "StackableDecorate.OnClickAttribute".GetHashCode();
+        private static int s_HashCode = "StackableDecorator.OnClickAttribute".GetHashCode();
 #endif
         public OnClickAttribute(string action)
         {
@@ -32,7 +32,7 @@ namespace StackableDecorator
 
         private void HandleEvent(Rect position)
         {
-            var id = GUIUtility.GetControlID(s_OnClickHash, FocusType.Passive, position);
+            var id = GUIUtility.GetControlID(s_HashCode, FocusType.Passive, position);
             var evt = Event.current;
             switch (evt.GetTypeForControl(id))
             {

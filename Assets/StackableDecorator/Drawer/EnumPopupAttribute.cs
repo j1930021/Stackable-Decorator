@@ -13,14 +13,12 @@ namespace StackableDecorator
         public string exclude = string.Empty;
         public string placeHolder = string.Empty;
 #if UNITY_EDITOR
-        private List<int> m_Indexs = null;
-        private string[] m_Exclude = null;
         private string[] m_Names = null;
-
-        private static GUIContent m_Content = new GUIContent(" ");
-        private static GUIStyle m_Style = null;
+        private List<int> m_Indexs = null;
 
         private DynamicValue<string[]> m_DynamicNames = new DynamicValue<string[]>();
+
+        private static GUIStyle s_Style = null;
 #endif
         public EnumPopupAttribute()
         {
@@ -41,42 +39,42 @@ namespace StackableDecorator
                 return;
             }
 
-            if (m_Style == null)
+            if (s_Style == null)
             {
-                m_Style = new GUIStyle(EditorStyles.popup);
-                m_Style.normal.background = null;
+                s_Style = new GUIStyle(EditorStyles.popup);
+                s_Style.normal.background = null;
             }
 
-            if (m_Indexs == null)
+            m_DynamicNames.UpdateAndCheckInitial(names, property);
+
+            if (m_Names == null)
             {
+                var exclude = this.exclude.Split(',');
                 m_Indexs = new List<int>();
-                m_Exclude = exclude.Split(',');
                 for (int i = 0; i < property.enumNames.Length; i++)
-                    if (!m_Exclude.Contains(property.enumNames[i]))
+                    if (!exclude.Contains(property.enumNames[i]))
                         m_Indexs.Add(i);
+
+                if (names == null)
+                    m_Names = property.enumDisplayNames.Except(exclude).ToArray();
+                else
+                {
+                    var array = m_DynamicNames.GetValue();
+                    m_Names = array == null ? names.Split(',') : array;
+                }
             }
 
             int selected = m_Indexs.IndexOf(property.enumValueIndex);
-            m_DynamicNames.UpdateAndCheckInitial(this.names, property);
-
-            if (m_Names == null && this.names != null)
-                m_Names = this.names.Split(',');
-            if (!m_DynamicNames.IsStatic())
-                m_Names = m_DynamicNames.GetValue();
-
-            var names = this.names == null ? property.enumDisplayNames.Except(m_Exclude).ToArray() : m_Names;
-
             label = EditorGUI.BeginProperty(position, label, property);
-            selected = EditorGUI.Popup(position, label.text, selected, names);
-            if (selected < 0 || selected >= names.Length)
+            var value = EditorGUI.Popup(position, label.text, selected, m_Names);
+            if (value < 0 || value >= m_Names.Length)
             {
-                var rect = EditorGUI.PrefixLabel(position, m_Content);
-                GUI.Label(rect, placeHolder, m_Style);
+                if (!property.hasMultipleDifferentValues)
+                    EditorGUI.LabelField(position, " ", placeHolder, s_Style);
             }
-            else
-                property.enumValueIndex = m_Indexs[selected];
+            else if (value != selected)
+                property.enumValueIndex = m_Indexs[value];
             EditorGUI.EndProperty();
-
         }
 #endif
     }

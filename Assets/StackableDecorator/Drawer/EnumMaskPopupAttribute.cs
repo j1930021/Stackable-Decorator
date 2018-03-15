@@ -24,7 +24,6 @@ namespace StackableDecorator
         private DynamicValue<string[]> m_DynamicNames = new DynamicValue<string[]>();
 
         private static GUIContent s_Content = new GUIContent();
-        private static GUIStyle s_Style = null;
         private static StringBuilder s_StringBuilder = new StringBuilder();
         private static int s_HashCode = "StackableDecorator.EnumMaskPopupAttribute".GetHashCode();
 #endif
@@ -47,34 +46,34 @@ namespace StackableDecorator
                 return;
             }
 
-            if (s_Style == null)
-            {
-                s_Style = new GUIStyle(EditorStyles.popup);
-                s_Style.normal.background = null;
-            }
-
             m_DynamicNames.UpdateAndCheckInitial(names, property);
 
             if (m_Names == null)
             {
                 var exclude = this.exclude.Split(',');
-                m_Values = Enum.GetNames(m_FieldInfo.FieldType).Except(exclude).Select(n => Convert.ToInt64(Enum.Parse(m_FieldInfo.FieldType, n))).ToList();
+                var type = m_FieldInfo.FieldType;
+                type = type.IsArrayOrList() ? type.GetArrayOrListElementType() : type;
+                m_Values = Enum.GetNames(type).Except(exclude).Select(n => Convert.ToInt64(Enum.Parse(type, n))).ToList();
 
                 if (names == null)
-                    m_Names = property.enumDisplayNames.Except(exclude).ToList();
+                    m_Names = Enum.GetNames(type).Except(exclude).ToList();
                 else
                 {
                     var array = m_DynamicNames.GetValue();
                     m_Names = array == null ? names.Split(',').ToList() : array.ToList();
                 }
 
-                var index = m_Values.IndexOf(0);
-                if (index >= 0)
+                int index;
+                while ((index = m_Values.IndexOf(0)) >= 0)
                 {
                     if (names == null)
                         m_Names.RemoveAt(index);
                     m_Values.RemoveAt(index);
                 }
+
+                var length = Mathf.Min(m_Names.Count, m_Values.Count);
+                m_Names = m_Names.Take(length).ToList();
+                m_Values = m_Values.Take(length).ToList();
             }
 
             long selected = property.longValue;
