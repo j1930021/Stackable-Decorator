@@ -7,6 +7,12 @@ public class DrawerSample : MonoBehaviour
     [StackableField]
     public string box1 = "Simple Box";
 
+    [TextField(placeHolder = "Please enter the text.")]
+    public string textField;
+
+    [TextField(3, placeHolder = "Please enter the text.")]
+    public string textField2;
+
     [Color(1, 0.5f, 0.5f, 1)]
     [Slider(0, 100)]
     public int slider = 0;
