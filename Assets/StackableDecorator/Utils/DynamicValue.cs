@@ -169,7 +169,7 @@ namespace StackableDecorator
             var prop = property;
             if (m_RelativePath != string.Empty)
             {
-                m_SerializedProperty.GetProperties(m_RelativePath.Yield(), m_PropertyList);
+                property.GetProperties(m_RelativePath.Yield(), m_PropertyList);
                 prop = m_PropertyList[0];
             }
             return prop;
@@ -387,8 +387,9 @@ namespace StackableDecorator
 
         private T[] GetSerializedPropertyValues()
         {
-            if (!m_SerializedProperty.hasMultipleDifferentValues)
-                return new T[] { GetSerializedPropertyValue(GetSerializedProperty(m_SerializedProperty)) };
+            var prop = GetSerializedProperty(m_SerializedProperty);
+            if (!prop.hasMultipleDifferentValues)
+                return new T[] { GetSerializedPropertyValue(prop) };
             var e = m_SerializedProperty.serializedObject.targetObjects.Select(obj => GetSerializedPropertyValue(obj));
             return e.ToArray();
         }
