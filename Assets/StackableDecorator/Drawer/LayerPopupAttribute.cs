@@ -22,11 +22,16 @@ namespace StackableDecorator
 #endif
         }
 #if UNITY_EDITOR
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label, bool includeChildren)
+        {
+            return EditorGUIUtility.singleLineHeight;
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
-            if (property.propertyType != SerializedPropertyType.Integer)
+            if (property.propertyType != SerializedPropertyType.String && property.propertyType != SerializedPropertyType.Integer)
             {
-                EditorGUI.LabelField(position, label.text, "Use with int.");
+                EditorGUI.LabelField(position, label.text, "Use with String or int.");
                 return;
             }
 
@@ -40,7 +45,11 @@ namespace StackableDecorator
                 m_Exclude = exclude.Split(',');
 
             var layers = InternalEditorUtility.layers.Except(m_Exclude).ToArray();
-            var layer = LayerMask.LayerToName(property.intValue);
+            string layer = string.Empty;
+            if (property.propertyType == SerializedPropertyType.String)
+                layer = property.stringValue;
+            if (property.propertyType == SerializedPropertyType.Integer)
+                layer = LayerMask.LayerToName(property.intValue);
 
             int selected = ArrayUtility.IndexOf(layers, layer);
             label = EditorGUI.BeginProperty(position, label, property);
@@ -51,7 +60,12 @@ namespace StackableDecorator
                     EditorGUI.LabelField(position, " ", placeHolder, s_Style);
             }
             else if (value != selected)
-                property.intValue = LayerMask.NameToLayer(layers[value]);
+            {
+                if (property.propertyType == SerializedPropertyType.Integer)
+                    property.intValue = LayerMask.NameToLayer(layers[value]);
+                else
+                    property.stringValue = layers[value];
+            }
             EditorGUI.EndProperty();
         }
 #endif
