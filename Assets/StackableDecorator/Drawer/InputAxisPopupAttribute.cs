@@ -50,6 +50,8 @@ namespace StackableDecorator
             if (s_SerializedObject == null)
             {
                 var obj = AssetDatabase.LoadMainAssetAtPath("ProjectSettings/InputManager.asset");
+                if (obj == null)
+                    obj = Resources.FindObjectsOfTypeAll<UnityEngine.Object>().FirstOrDefault(o => o.name.Equals("InputManager"));
                 if (obj != null)
                     s_SerializedObject = new SerializedObject(obj);
             }
