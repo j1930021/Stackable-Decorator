@@ -33,4 +33,16 @@ public class DrawerSample : MonoBehaviour
     [Label(icon = "GameObject Icon")]
     [AsString(label = false, icon = true)]
     public string asString = "As String Sample";
+
+    [ColorField(showEyedropper = false)]
+    public Color color;
+
+    [CurveField(1, 0, 1, -1, -1, 1, 1)]
+    public AnimationCurve curve;
+
+    [ProgressBar(100, decimalPlaces = 0)]
+    public int progress = 53;
+
+    [ProgressBar(22, 88, showLabel = false, prefix = true)]
+    public int progress2 = 39;
 }
