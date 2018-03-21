@@ -12,6 +12,7 @@ namespace StackableDecorator
         public bool keyOrMouseButton = true;
         public bool mouseMovement = true;
         public bool joystickAxis = true;
+        public bool negativeButton = true;
         public string exclude = string.Empty;
         public string placeHolder = string.Empty;
 #if UNITY_EDITOR
@@ -70,6 +71,11 @@ namespace StackableDecorator
                 if (type.intValue == 1 && !mouseMovement) continue;
                 if (type.intValue == 2 && !joystickAxis) continue;
                 if (m_Exclude.Contains(prop.displayName)) continue;
+                if (!negativeButton)
+                {
+                    if (prop.FindPropertyRelative("negativeButton").stringValue != string.Empty) continue;
+                    if (prop.FindPropertyRelative("altNegativeButton").stringValue != string.Empty) continue;
+                }
                 s_Axes.Add(prop.displayName);
             }
             var axes = s_Axes.Distinct().ToArray();
