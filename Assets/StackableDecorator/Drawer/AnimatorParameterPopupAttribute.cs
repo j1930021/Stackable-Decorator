@@ -45,9 +45,9 @@ namespace StackableDecorator
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label, bool includeChildren)
         {
-            if (property.propertyType != SerializedPropertyType.String && property.propertyType != SerializedPropertyType.Integer)
+            if (property.propertyType != SerializedPropertyType.String)
             {
-                EditorGUI.LabelField(position, label.text, "Use with String or int.");
+                EditorGUI.LabelField(position, label.text, "Use with String.");
                 return;
             }
 
