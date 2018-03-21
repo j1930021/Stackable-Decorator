@@ -9,6 +9,9 @@ namespace StackableDecorator
 {
     public class InputAxisPopupAttribute : StackableFieldAttribute
     {
+        public bool keyOrMouseButton = true;
+        public bool mouseMovement = true;
+        public bool joystickAxis = true;
         public string exclude = string.Empty;
         public string placeHolder = string.Empty;
 #if UNITY_EDITOR
@@ -61,7 +64,14 @@ namespace StackableDecorator
 
             s_Axes.Clear();
             foreach (SerializedProperty prop in s_SerializedObject.FindProperty("m_Axes"))
+            {
+                var type = prop.FindPropertyRelative("type");
+                if (type.intValue == 0 && !keyOrMouseButton) continue;
+                if (type.intValue == 1 && !mouseMovement) continue;
+                if (type.intValue == 2 && !joystickAxis) continue;
+                if (m_Exclude.Contains(prop.displayName)) continue;
                 s_Axes.Add(prop.displayName);
+            }
             var axes = s_Axes.Distinct().ToArray();
 
             int selected = ArrayUtility.IndexOf(axes, property.stringValue);
